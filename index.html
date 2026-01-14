@@ -3,45 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sean-as-a-Service: Enterprise Idle</title>
+    <title>SuperExcitingAndNormal Idle</title>
     <style>
-        :root { --primary: #00d4ff; --bg: #0a0b10; --card: #161b22; --accent: #58a6ff; }
-        body { background: var(--bg); color: #c9d1d9; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        #top-bar { width: 100%; background: #010409; padding: 15px; text-align: center; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 10; }
-        .currency-main { font-size: 2.5rem; color: var(--primary); font-weight: bold; margin: 5px 0; }
-        .stats-bar { font-size: 0.9rem; color: #8b949e; }
+        :root { --accent: #4ecca3; --bg: #1a1a2e; --panel: #16213e; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
         
-        #game-container { display: flex; gap: 20px; padding: 20px; max-width: 1000px; width: 100%; }
-        #click-zone { flex: 1; text-align: center; background: var(--card); padding: 40px; border-radius: 15px; border: 1px solid #30363d; height: fit-content; }
-        #shop-zone { flex: 1.5; }
+        /* Egg Styling */
+        #egg-container { text-align: center; cursor: pointer; transition: transform 0.1s; position: relative; }
+        #egg-container:active { transform: scale(0.95); }
+        .egg { width: 200px; height: 260px; background: #e0e0e0; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; display: flex; align-items: center; justify-content: center; border: 4px solid #bdc3c7; box-shadow: inset -10px -10px 20px rgba(0,0,0,0.1); }
+        .egg-text { color: #333; font-weight: bold; font-size: 14px; text-align: center; padding: 20px; pointer-events: none; }
 
-        .sean-node { width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--primary); cursor: pointer; transition: 0.1s; box-shadow: 0 0 20px rgba(0,212,255,0.2); }
-        .sean-node:active { transform: scale(0.92); filter: brightness(1.2); }
-
-        .upgrade-card { background: var(--card); border: 1px solid #30363d; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-        .upgrade-card:hover:not(.disabled) { border-color: var(--accent); }
-        .info { flex-grow: 1; }
-        .name { color: var(--accent); font-weight: bold; display: block; }
-        .cost { font-size: 0.85rem; color: #7d8590; }
+        /* Game Elements (Hidden Initially) */
+        #game-ui { display: none; text-align: center; width: 100%; max-width: 500px; }
+        .sean-main { width: 200px; height: 200px; border-radius: 50%; border: 5px solid var(--accent); cursor: pointer; object-fit: cover; margin-bottom: 20px; }
         
-        button { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-        button.prestige { background: #8957e5; margin-top: 20px; width: 100%; padding: 15px; font-size: 1.1rem; }
-
-        .multiplier-tag { color: #f85149; font-weight: bold; }
+        .currency-box { background: var(--panel); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #0f3460; }
+        .shop-item { background: var(--panel); border: 1px solid #0f3460; padding: 15px; margin: 10px 0; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        
+        button { background: var(--accent); border: none; padding: 10px 20px; border-radius: 5px; color: #1a1a2e; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #555; color: #888; cursor: not-allowed; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="top-bar">
-        <div class="stats-bar">CURRENT INSTANCES</div>
-        <div class="currency-main" id="sean-count">0</div>
-        <div class="stats-bar">
-            Network Throughput: <span id="sps-rate">0</span> Seans/sec | 
-            Compute Multiplier: <span id="mult-display" class="multiplier-tag">1.0x</span>
+    <div id="egg-container" onclick="handleEggClick()">
+        <div class="egg">
+            <div class="egg-text">SuperExcitingAndNormal Idle</div>
+        </div>
+        <p id="egg-hint" style="color: #555; margin-top: 15px;">Click to interact</p>
+    </div>
+
+    <div id="game-ui">
+        <h1 style="letter-spacing: 2px;">S.E.A.N. NETWORK</h1>
+        
+        <div class="currency-box">
+            <img src="sean.png" class="sean-main" onclick="handleSeanClick()" alt="The Core">
+            <h2 id="bux-count">0 SeanBux</h2>
+            <p style="color: var(--accent)">SPS: <span id="sps-rate">0</span></p>
+        </div>
+
+        <div id="shop">
+            <div class="shop-item">
+                <div style="text-align: left;">
+                    <strong>Local Connection</strong><br>
+                    <small>+1 SeanBux/sec</small>
+                </div>
+                <button onclick="buyUpgrade(0)" id="btn0">Cost: 15</button>
+            </div>
+            <div class="shop-item">
+                <div style="text-align: left;">
+                    <strong>Server Integration</strong><br>
+                    <small>+8 SeanBux/sec</small>
+                </div>
+                <button onclick="buyUpgrade(1)" id="btn1">Cost: 100</button>
+            </div>
         </div>
     </div>
 
-    <div id="game-container">
-        <div id="click-zone">
-            <img id="main-clicker" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAIABJREFUeF7tfQecXMX19nvlvZ277tU7V6uEChIg0SSEEB3MBmwwNuA6xInBf9jghmMTYzsYm2CccG0IIdR7771Xq3fdu72X9/6f75s3u9pVK5I9yYv9vPsh7e3uzps388pXzzmno699f7VHgOnrO7C+p9A3AfvaY7CvAf7XAL6+BvjaY7CvAfr6DPx9DfC1x2BfA/SNCXw987pXGIAQAs7LPrO+V7CvfX8YCOyLBugLBPZtE/0+A19fA/T9Gfj7GuBrj8G+BvjaYpA0AK/m3V7pOn37Bv99/v9mQGC3X9m8H/q37eX52X1/2w/m9X890/vXm/+81+G569t/M8/v/P6/Xf927f8uIPDbN/+b+f7vCgj0pWHz+7/re/D167Xl6P9+H/O/6H2f7fXn+v6+7u/x7/f8+p785p7/puf/z/VzX3P99P72P/vY08X+Tq0pAFp93/X6798MCOz94/T8+77n/f/9/M9n+fK873uOnp//fK8/L6+f186A9f55/V/96mNf9/v9/9Xn/Xv8X+z/qfPzP/9/Bgh2BwS+YpD83/3990O8739Gz9f9XfD91v/87/O+7vV7/e/9/f33+r77ev13v9/v7787/Xf/6Pj86/Xv+57rX69/3f3f6/993/Pr/76/T79v3/f9ffr9vP4+vP7z9f3z+eH788C9fs69f3u/p6/fn/v3ffO+v+8BvOf65+f/p/vX9fX/vvd5/+8f/D59f977/H75/Xm6O7/v3+uFv6/P/OdfuA/9P+x7X7/X9/3P39f3/f/U7/Xv35/Xf3f6e/8//b5/r/fO6+/H6z/n/69/P/eP/vD3eM9p/v78/t678Ofr5+H1H++9r7+fr9/r/O/uX9f3X6fXf7p/9P/9f//P9Xv9ffp7vOf8N7+H13u6f70++f8CIn8f8Onv/D//Xn8/v6/P/7966m7fA1yv7Xf5e+3/O/4X33v9e/79fO/19/L0fP8L9L3OfvP6L/7u76nfv75ffp++97o98L3+L/qeeW98Pe7O/+L7/o/7Ovxv5/df/B39T9/vv5zve+7Pf+F3+8f6L+Lvn/9dfi/fM/1pX/8/XN+v7p/f0e8f7u+f74F++Hv3ffOeeW99/Xf+d+7P9+P9uR//9fze3+v74+7/uP+fv+f6v9fXp9+fr0+/L77nuR//V7+X76He/33u1//N+87v+F98T9/9fT/e89y778XfI/68r8+77+f/5v3Xf9737+78vunP9vvn+3fX60vB63P8vXyPfA+9vvyO+H/63uB65X34v/+G/593h+/x3/w+fX/+Pffhf/P35/f0n/fO6+/t8+G7u9/0P6M+yN/378X/0p93X/8/9X/u78Xf0e9B/z7vj/+vPtjX/3eX79nf+/fC+6m/r3+uP9/vv88H7/P57vLz1++fv5vv2/f9e+j3zXvnf7g/x3P/3/177pffq/8c//0X/8t07/q3fU/ff77/+h98/+8F9vTf8ffj7/m5v/8L7+/+/e9LwP+e5n74//lzeB983//X6/v+P/re4ffo/q733/83Xp+vR98fPof7O/o+4XvA9+S+f45e+T/u8p7n6Pv9f3uX5333f/P39f99778v//+77/f78716L3fP6/+C///S78V/n9f/3S3/8+93N/v9e74v/7v/Xv8Xf8+/179Nf87fT/83/Xv8uX6f+fL03H9X+H+W30e/j/7f8f90X8957uX767Xv/v39PfN/u+e7/0/ff/25/vN8z/5//p3/3/S9wf9n/k9fM79X35u6p67fVf9X77Xre8b/9+n91P+v+2fu6/zW/31//3yvf/X7O/fje53/m7+jv9M/X8/9XfVv9Xvx9/+v79n78u7v0+7m/8/P8r/yvvp68X25O//3z70XvD++N/j+63/mPfD+6X/m/fXf3X//L339/97X/+9zX3Pf/F/9+f9p36m9p34Pvl90z/+f74dfy/fg64P/f773uVf7v5rv2ffF9/9+H3X33+u9pX73/iX6Pukf6T+j30m/Z30/8p66u32/fA9y/77nuL/+M/TffT3/8z6O+X/6Z/l9u6/vPe+X/7/ve3zfd+93v5bvge+1f59/N9/D/L75++n63f9vfn8/83v69/9fXf/df999D79v/2++L/+fP9ffW/fP8ffv/8vP1X8/ff7/3f0vfv++l36v796n/4ffD93T76u7z97P0PfO9yNfv+/L+8uX5/v2Pfw/u69m9/3mXv5P+L681XvVf8vfw99b/+39K9/T75vvr3+f79e7/+f6mvt6717/yfe8/p2f4+/v9/379P/V9/d1n4m+7v/6N/o+68/Rfebr9vvi+6Dvm7+v7oM938vX/1+3775XfsX7m6/X79u7v7uP7/p9/vM+0f/D6/F9+N7o6/f1vL96P393n9fXf2/Pe6fvd31/3T/R6/OfXf939z799/pXuv/o69fvu/uzP9//Xv83X78/z+/re/v3Y6/n7r+T93P93v07vH97Z9+Xp/u6/v/q/u97/N//9/uU97V3N/+f/f5/6u77987Vv3W7v9v7N/f+7v789Xre8+/97vK6v8f/j59X189679fve67v1/37+9zTf76n3/ff6D/T13fVz1/3t3h7++p7/Gv7T9e3X897v76HvrV/r/77vrV/rf/61+rf/Lq/z7/W1/S907/H/5V+L+9//o/6H+3/uP/5
+    <script>
+        let eggClicks = 0;
+        const HATCH_THRESHOLD = 10;
+        let seanBux = 0;
+        let sps = 0;
+
+        const upgrades = [
+            { cost: 15, power: 1 },
+            { cost: 100, power: 8 }
+        ];
+
+        function handleEggClick() {
+            eggClicks++;
+            // Add a little shake effect
+            document.getElementById('egg-container').style.transform = `rotate(${Math.sin(eggClicks) * 5}deg)`;
+            
+            if (eggClicks >= HATCH_THRESHOLD) {
+                document.getElementById('egg-container').classList.add('hidden');
+                document.getElementById('game-ui').style.display = 'block';
+            }
+        }
+
+        function handleSeanClick() {
+            seanBux++;
+            updateDisplay();
+        }
+
+        function buyUpgrade(index) {
+            let u = upgrades[index];
+            if (seanBux >= u.cost) {
+                seanBux -= u.cost;
+                sps += u.power;
+                u.cost = Math.floor(u.cost * 1.2);
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('bux-count').innerText = `${Math.floor(seanBux)} SeanBux`;
+            document.getElementById('sps-rate').innerText = sps.toFixed(1);
+            upgrades.forEach((u, i) => {
+                const btn = document.getElementById(`btn${i}`);
+                btn.innerText = `Cost: ${u.cost}`;
+                btn.disabled = seanBux < u.cost;
+            });
+        }
+
+        // Game Loop
+        setInterval(() => {
+            if (eggClicks >= HATCH_THRESHOLD) {
+                seanBux += (sps / 10);
+                updateDisplay();
+            }
+        }, 100);
+    </script>
+</body>
+</html>
