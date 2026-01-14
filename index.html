@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sean Connect: Idle Expansion</title>
+    <style>
+        body { background: #1a1a2e; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        #header { text-align: center; margin-bottom: 20px; }
+        #currency-container { background: #16213e; padding: 20px; border-radius: 15px; border: 2px solid #0f3460; min-width: 300px; text-align: center; }
+        .sean-icon { width: 50px; height: 50px; border-radius: 50%; vertical-align: middle; margin: 0 10px; border: 2px solid #4ecca3; }
+        .main-img { width: 150px; cursor: pointer; transition: transform 0.1s; }
+        .main-img:active { transform: scale(0.95); }
+        #shop { margin-top: 20px; width: 100%; max-width: 500px; }
+        .upgrade { background: #0f3460; margin: 10px 0; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .upgrade:hover { background: #162447; }
+        button { background: #4ecca3; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        .stats { font-size: 0.9em; color: #4ecca3; }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>SEAN CONNECT</h1>
+        <p>Connect the Seans. Expand the Network.</p>
+    </div>
+
+    <div id="currency-container">
+        <img src="sean.png" id="clicker" class="main-img" alt="SEAN">
+        <h2 id="sean-count">0 Seans</h2>
+        <p class="stats">SPS (Seans Per Second): <span id="sps-rate">0</span></p>
+    </div>
+
+    <div id="shop">
+        <div class="upgrade">
+            <div>
+                <strong>Basic Sean Generator</strong><br>
+                <small>+1 SPS</small>
+            </div>
+            <button onclick="buyUpgrade(0)" id="btn0">Cost: 15</button>
+        </div>
+        <div class="upgrade">
+            <div>
+                <strong>Sean Duplicator Array</strong><br>
+                <small>+5 SPS</small>
+            </div>
+            <button onclick="buyUpgrade(1)" id="btn1">Cost: 100</button>
+        </div>
+        <div class="upgrade">
+            <div>
+                <strong>Global Sean Network</strong><br>
+                <small>+20 SPS</small>
+            </div>
+            <button onclick="buyUpgrade(2)" id="btn2">Cost: 500</button>
+        </div>
+    </div>
+
+    <script>
+        let seans = 0;
+        let sps = 0;
+
+        const upgrades = [
+            { id: 0, name: "Generator", cost: 15, power: 1, owned: 0 },
+            { id: 1, name: "Array", cost: 100, power: 5, owned: 0 },
+            { id: 2, name: "Network", cost: 500, power: 20, owned: 0 }
+        ];
+
+        const clicker = document.getElementById('clicker');
+        const countDisplay = document.getElementById('sean-count');
+        const spsDisplay = document.getElementById('sps-rate');
+
+        clicker.addEventListener('click', () => {
+            seans++;
+            updateDisplay();
+        });
+
+        function buyUpgrade(index) {
+            const u = upgrades[index];
+            if (seans >= u.cost) {
+                seans -= u.cost;
+                u.owned++;
+                sps += u.power;
+                u.cost = Math.floor(u.cost * 1.15); // Scale cost
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            countDisplay.innerText = `${Math.floor(seans)} Seans`;
+            spsDisplay.innerText = sps.toFixed(1);
+            upgrades.forEach((u, i) => {
+                const btn = document.getElementById(`btn${i}`);
+                btn.innerText = `Cost: ${u.cost}`;
+                btn.disabled = seans < u.cost;
+            });
+        }
+
+        // Main Game Loop
+        setInterval(() => {
+            seans += (sps / 10);
+            updateDisplay();
+        }, 100);
+    </script>
+</body>
+</html>
