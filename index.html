@@ -3,119 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperExcitingAndNormal Idle</title>
+    <title>S.E.A.N. Protocol</title>
     <style>
-        :root { --accent: #4ecca3; --bg: #1a1a2e; --panel: #16213e; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
-        
-        /* Egg Styling */
-        #egg-container { text-align: center; cursor: pointer; transition: transform 0.1s; position: relative; }
-        #egg-container:active { transform: scale(0.95); }
-        .egg { width: 200px; height: 260px; background: #e0e0e0; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; display: flex; align-items: center; justify-content: center; border: 4px solid #bdc3c7; box-shadow: inset -10px -10px 20px rgba(0,0,0,0.1); }
-        .egg-text { color: #333; font-weight: bold; font-size: 14px; text-align: center; padding: 20px; pointer-events: none; }
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --primary: #38bdf8;
+            --accent: #818cf8;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
 
-        /* Game Elements (Hidden Initially) */
-        #game-ui { display: none; text-align: center; width: 100%; max-width: 500px; }
-        .sean-main { width: 200px; height: 200px; border-radius: 50%; border: 5px solid var(--accent); cursor: pointer; object-fit: cover; margin-bottom: 20px; }
+        * { box-sizing: border-box; user-select: none; }
         
-        .currency-box { background: var(--panel); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #0f3460; }
-        .shop-item { background: var(--panel); border: 1px solid #0f3460; padding: 15px; margin: 10px 0; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Utility */
+        .hidden { display: none !important; opacity: 0; }
+        .fade-in { animation: fadeIn 1s forwards; }
+
+        /* Stage 1: The Artifact (Egg) */
+        #artifact-stage {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.05s;
+        }
         
-        button { background: var(--accent); border: none; padding: 10px 20px; border-radius: 5px; color: #1a1a2e; font-weight: bold; cursor: pointer; }
-        button:disabled { background: #555; color: #888; cursor: not-allowed; }
-        .hidden { display: none !important; }
+        .artifact {
+            width: 180px;
+            height: 240px;
+            background: radial-gradient(circle at 30% 30%, #e2e8f0, #cbd5e1);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+            border: 1px solid #94a3b8;
+        }
+
+        .artifact::after {
+            content: "PROJECT: NORMAL";
+            font-size: 0.7rem;
+            color: #64748b;
+            font-family: monospace;
+            letter-spacing: 2px;
+            position: absolute;
+            bottom: 40px;
+        }
+
+        /* Stage 2: Dashboard */
+        #dashboard-stage {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Left Panel: Core */
+        .core-display {
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .sean-avatar {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 4px solid var(--primary);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            object-fit: cover;
+        }
+
+        .sean-avatar:active { transform: scale(0.95); }
+        .sean-avatar:hover { box-shadow: 0 0 40px rgba(56, 189, 248, 0.6); }
+
+        .metric-container { margin-top: 20px; }
+        .currency { font-size: 2rem; font-weight: 800; color: var(--text-main); }
+        .rate { color: var(--primary); font-family: monospace; font-size: 1.1rem; margin-top: 5px; }
+
+        /* Right Panel: Upgrades */
+        .upgrade-list {
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .upgrade-list::-webkit-scrollbar { width: 6px; }
+        .upgrade-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .upgrade-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .upgrade-card:hover { border-color: var(--primary); }
+        .upgrade-info h4 { margin: 0; font-size: 1rem; }
+        .upgrade-info p { margin: 4px 0 0; color: var(--text-muted); font-size: 0.85rem; }
+
+        .btn-buy {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 100px;
+            transition: opacity 0.2s;
+        }
+        
+        .btn-buy:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* Floating Text Particles */
+        .floater {
+            position: absolute;
+            color: var(--primary);
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            #dashboard-stage { grid-template-columns: 1fr; overflow-y: scroll; height: auto;}
+        }
     </style>
 </head>
 <body>
 
-    <div id="egg-container" onclick="handleEggClick()">
-        <div class="egg">
-            <div class="egg-text">SuperExcitingAndNormal Idle</div>
-        </div>
-        <p id="egg-hint" style="color: #555; margin-top: 15px;">Click to interact</p>
+    <div id="artifact-stage" onclick="game.clickArtifact(event)">
+        <div class="artifact"></div>
+        <p style="color: var(--text-muted); margin-top: 20px; font-size: 0.9rem;">Initializing...</p>
     </div>
 
-    <div id="game-ui">
-        <h1 style="letter-spacing: 2px;">S.E.A.N. NETWORK</h1>
+    <div id="dashboard-stage" class="hidden">
         
-        <div class="currency-box">
-            <img src="sean.png" class="sean-main" onclick="handleSeanClick()" alt="The Core">
-            <h2 id="bux-count">0 SeanBux</h2>
-            <p style="color: var(--accent)">SPS: <span id="sps-rate">0</span></p>
+        <div class="panel core-display">
+            <h2 style="margin-bottom: 30px; letter-spacing: 2px; font-weight: 300;">SEAN CONNECT</h2>
+            <img src="sean.png" class="sean-avatar" onclick="game.clickSean(event)" draggable="false">
+            
+            <div class="metric-container">
+                <div class="currency" id="ui-currency">0</div>
+                <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Total Seans</div>
+                <div class="rate" id="ui-rate">0.0 / sec</div>
+            </div>
+
+            <div style="margin-top: auto; width: 100%;">
+                <button onclick="game.hardReset()" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 5px 10px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; opacity: 0.5;">RESET DATABASE</button>
+            </div>
         </div>
 
-        <div id="shop">
-            <div class="shop-item">
-                <div style="text-align: left;">
-                    <strong>Local Connection</strong><br>
-                    <small>+1 SeanBux/sec</small>
+        <div class="panel">
+            <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 0;">Infrastructure</h3>
+            <div class="upgrade-list" id="ui-upgrades">
                 </div>
-                <button onclick="buyUpgrade(0)" id="btn0">Cost: 15</button>
-            </div>
-            <div class="shop-item">
-                <div style="text-align: left;">
-                    <strong>Server Integration</strong><br>
-                    <small>+8 SeanBux/sec</small>
-                </div>
-                <button onclick="buyUpgrade(1)" id="btn1">Cost: 100</button>
-            </div>
         </div>
     </div>
 
     <script>
-        let eggClicks = 0;
-        const HATCH_THRESHOLD = 10;
-        let seanBux = 0;
-        let sps = 0;
+        /**
+         * Game Configuration & Data Structure
+         */
+        const CONFIG = {
+            eggClicksRequired: 15,
+            tickRate: 100, // 10 ticks per second
+            saveKey: 'sean_idle_save_v1'
+        };
 
-        const upgrades = [
-            { cost: 15, power: 1 },
-            { cost: 100, power: 8 }
+        const UPGRADE_DATA = [
+            { id: 0, name: "Local Area Sean", desc: "A Sean on the LAN.", baseCost: 15, production: 1 },
+            { id: 1, name: "Sean Virtual Machine", desc: "Emulated friendship.", baseCost: 100, production: 5 },
+            { id: 2, name: "Containerized Sean", desc: "Kubernetes managed Seans.", baseCost: 1100, production: 12 },
+            { id: 3, name: "SeanGPT Model", desc: "AI generated companionship.", baseCost: 12000, production: 45 },
+            { id: 4, name: "Quantum Sean", desc: "He is both there and not there.", baseCost: 130000, production: 150 },
         ];
 
-        function handleEggClick() {
-            eggClicks++;
-            // Add a little shake effect
-            document.getElementById('egg-container').style.transform = `rotate(${Math.sin(eggClicks) * 5}deg)`;
-            
-            if (eggClicks >= HATCH_THRESHOLD) {
-                document.getElementById('egg-container').classList.add('hidden');
-                document.getElementById('game-ui').style.display = 'block';
+        /**
+         * Core Game Logic
+         */
+        class Game {
+            constructor() {
+                this.state = {
+                    eggClicks: 0,
+                    unlocked: false,
+                    currency: 0,
+                    lifetimeCurrency: 0,
+                    upgrades: Array(UPGRADE_DATA.length).fill(0), // Count of each upgrade
+                    startTime: Date.now()
+                };
+
+                this.load();
+                this.initUI();
+                this.loopId = setInterval(() => this.tick(), CONFIG.tickRate);
+                this.saveId = setInterval(() => this.save(), 5000); // Auto-save 5s
+            }
+
+            // --- Mechanics ---
+
+            get productionPerSecond() {
+                return this.state.upgrades.reduce((total, count, index) => {
+                    return total + (count * UPGRADE_DATA[index].production);
+                }, 0);
+            }
+
+            clickArtifact(e) {
+                this.state.eggClicks++;
+                
+                // Visual feedback
+                const el = document.querySelector('.artifact');
+                el.style.transform = `scale(0.95) rotate(${Math.random() * 10 - 5}deg)`;
+                setTimeout(() => el.style.transform = 'scale(1) rotate(0deg)', 50);
+
+                if (this.state.eggClicks >= CONFIG.eggClicksRequired) {
+                    this.unlockGame();
+                }
+            }
+
+            unlockGame() {
+                this.state.unlocked = true;
+                this.save();
+                this.renderTransition();
+            }
+
+            clickSean(e) {
+                this.addCurrency(1);
+                this.spawnFloater(e.clientX, e.clientY, "+1");
+            }
+
+            addCurrency(amount) {
+                this.state.currency += amount;
+                this.state.lifetimeCurrency += amount;
+                this.updateUI(); // Immediate update for responsiveness
+            }
+
+            buyUpgrade(index) {
+                const cost = this.getCost(index);
+                if (this.state.currency >= cost) {
+                    this.state.currency -= cost;
+                    this.state.upgrades[index]++;
+                    this.updateUI();
+                }
+            }
+
+            getCost(index) {
+                const base = UPGRADE_DATA[index].baseCost;
+                const count = this.state.upgrades[index];
+                return Math.floor(base * Math.pow(1.15, count));
+            }
+
+            // --- Engine ---
+
+            tick() {
+                if (!this.state.unlocked) return;
+                const earned = this.productionPerSecond / (1000 / CONFIG.tickRate);
+                this.addCurrency(earned);
+            }
+
+            spawnFloater(x, y, text) {
+                const el = document.createElement('div');
+                el.classList.add('floater');
+                el.textContent = text;
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            }
+
+            // --- UI & Rendering ---
+
+            initUI() {
+                // Generate Upgrade DOM
+                const list = document.getElementById('ui-upgrades');
+                list.innerHTML = '';
+                UPGRADE_DATA.forEach((u, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'upgrade-card';
+                    div.innerHTML = `
+                        <div class="upgrade-info">
+                            <h4>${u.name}</h4>
+                            <p>${u.desc}</p>
+                            <p style="color: var(--accent); font-size: 0.75rem; margin-top: 5px;">+${u.production} SPS</p>
+                        </div>
+                        <button class="btn-buy" id="btn-buy-${i}" onclick="game.buyUpgrade(${i})">
+                            Cost
+                        </button>
+                    `;
+                    list.appendChild(div);
+                });
+
+                if (this.state.unlocked) {
+                    document.getElementById('artifact-stage').classList.add('hidden');
+                    document.getElementById('dashboard-stage').classList.remove('hidden');
+                    document.getElementById('dashboard-stage').classList.add('fade-in');
+                }
+            }
+
+            renderTransition() {
+                const egg = document.getElementById('artifact-stage');
+                const dash = document.getElementById('dashboard-stage');
+                
+                egg.style.opacity = '0';
+                setTimeout(() => {
+                    egg.classList.add('hidden');
+                    dash.classList.remove('hidden');
+                    dash.classList.add('fade-in');
+                }, 500);
+            }
+
+            updateUI() {
+                if (!this.state.unlocked) return;
+
+                // Update Stats
+                document.getElementById('ui-currency').innerText = Math.floor(this.state.currency).toLocaleString();
+                document.getElementById('ui-rate').innerText = `${this.productionPerSecond.toFixed(1)} Seans/sec`;
+
+                // Update Buttons
+                UPGRADE_DATA.forEach((u, i) => {
+                    const btn = document.getElementById(`btn-buy-${i}`);
+                    const cost = this.getCost(i);
+                    const count = this.state.upgrades[i];
+                    
+                    btn.innerHTML = `<div>${cost.toLocaleString()}</div><div style="font-size:0.7em; opacity:0.8">Lvl ${count}</div>`;
+                    
+                    if (this.state.currency >= cost) {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    } else {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                    }
+                });
+            }
+
+            // --- Persistence ---
+
+            save() {
+                localStorage.setItem(CONFIG.saveKey, JSON.stringify(this.state));
+            }
+
+            load() {
+                const data = localStorage.getItem(CONFIG.saveKey);
+                if (data) {
+                    const saved = JSON.parse(data);
+                    // Merge save with default state to handle version updates safely
+                    this.state = { ...this.state, ...saved };
+                }
+            }
+
+            hardReset() {
+                if(confirm("Wipe save data? This cannot be undone.")) {
+                    localStorage.removeItem(CONFIG.saveKey);
+                    location.reload();
+                }
             }
         }
 
-        function handleSeanClick() {
-            seanBux++;
-            updateDisplay();
-        }
+        // Start
+        const game = new Game();
 
-        function buyUpgrade(index) {
-            let u = upgrades[index];
-            if (seanBux >= u.cost) {
-                seanBux -= u.cost;
-                sps += u.power;
-                u.cost = Math.floor(u.cost * 1.2);
-                updateDisplay();
-            }
-        }
-
-        function updateDisplay() {
-            document.getElementById('bux-count').innerText = `${Math.floor(seanBux)} SeanBux`;
-            document.getElementById('sps-rate').innerText = sps.toFixed(1);
-            upgrades.forEach((u, i) => {
-                const btn = document.getElementById(`btn${i}`);
-                btn.innerText = `Cost: ${u.cost}`;
-                btn.disabled = seanBux < u.cost;
-            });
-        }
-
-        // Game Loop
-        setInterval(() => {
-            if (eggClicks >= HATCH_THRESHOLD) {
-                seanBux += (sps / 10);
-                updateDisplay();
-            }
-        }, 100);
     </script>
 </body>
 </html>
