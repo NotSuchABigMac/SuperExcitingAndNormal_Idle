@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Exciting and Normal Protocol: Ultimate</title>
+    <title>S.E.A.N. Protocol: Fountain Edition</title>
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -23,40 +23,47 @@
             color: var(--text-main);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
-            /* Changed to min-height to prevent clipping on weird aspect ratios */
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Kept for desktop "App" feel */
+            overflow: hidden;
         }
 
-        /* Particles Layer */
+        /* --- PARTICLES --- */
         #particle-layer {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            z-index: 999;
-            overflow: hidden;
+            z-index: 9999; /* On top of everything */
         }
         
         .mini-sean {
             position: absolute;
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             border-radius: 50%;
+            object-fit: cover;
+            will-change: transform, opacity;
+        }
+
+        /* --- HERO ANIMATION --- */
+        #hero-sean {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            border: 8px solid var(--gold);
+            box-shadow: 0 0 50px var(--gold);
+            z-index: 5000;
+            display: none;
             object-fit: cover;
         }
 
-        /* Notifications */
+        /* --- NOTIFICATIONS --- */
         #toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            position: fixed; bottom: 20px; right: 20px; z-index: 10000;
+            display: flex; flex-direction: column; gap: 10px;
         }
 
         .toast {
@@ -68,17 +75,24 @@
             animation: slideIn 0.5s ease-out;
             min-width: 250px;
         }
-        
         .toast h4 { margin: 0 0 5px 0; color: var(--gold); font-size: 0.9rem; }
         .toast p { margin: 0; font-size: 0.8rem; }
-
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        /* Utility */
+        /* --- UTILITY --- */
         .hidden { display: none !important; opacity: 0; }
         .fade-in { animation: fadeIn 1s forwards; }
+        .shake-screen { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
 
-        /* Stage 1: The Artifact */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* --- STAGE 1: THE ARTIFACT --- */
         #artifact-stage { text-align: center; cursor: pointer; transition: transform 0.05s; z-index: 10; }
         .artifact {
             width: 180px; height: 240px;
@@ -93,19 +107,11 @@
             font-family: monospace; letter-spacing: 2px; position: absolute; bottom: 40px;
         }
 
-        /* Stage 2: Dashboard */
+        /* --- STAGE 2: DASHBOARD --- */
         #dashboard-stage {
-            /* FIXED: Use viewport width units and limit max width */
-            width: 96vw; 
-            max-width: 1200px; 
-            height: 90vh; /* Leave room for browser UI */
-            
-            /* FIXED: Flexible columns */
-            display: grid; 
-            grid-template-columns: 280px 1fr 280px; 
-            
-            gap: 20px; 
-            padding: 0; /* Remove padding to save space */
+            width: 96vw; max-width: 1200px; height: 90vh;
+            display: grid; grid-template-columns: 280px 1fr 280px;
+            gap: 20px; padding: 0; opacity: 0; /* Hidden initially for fade in */
         }
 
         .panel {
@@ -115,21 +121,18 @@
             padding: 20px;
             display: flex; flex-direction: column;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            height: 100%; /* Ensure panels fill the grid height */
+            overflow: hidden; height: 100%;
         }
 
-        /* Columns */
         .col-left { text-align: center; align-items: center; }
-        .col-mid { }
-        .col-right { }
-
+        
         .sean-avatar {
-            width: 150px; height: 150px; /* Slightly smaller for safety */
+            width: 150px; height: 150px;
             border-radius: 50%; border: 4px solid var(--primary);
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
             cursor: pointer; transition: transform 0.1s;
             object-fit: cover; margin-top: 20px;
+            position: relative; z-index: 5;
         }
         .sean-avatar:active { transform: scale(0.90); }
 
@@ -148,7 +151,6 @@
             font-weight: bold; cursor: pointer; margin-top: 5px;
         }
 
-        /* Lists */
         .scroll-list { overflow-y: auto; padding-right: 5px; flex-grow: 1; }
         .scroll-list::-webkit-scrollbar { width: 4px; }
         .scroll-list::-webkit-scrollbar-thumb { background: var(--border); }
@@ -168,33 +170,13 @@
         }
         .btn-buy:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Responsive Fixes */
-        /* Increased breakpoint to 1100px to catch laptops/tablets earlier */
         @media (max-width: 1100px) {
-            body {
-                overflow-y: auto; /* Enable scroll for mobile/tablet */
-                height: auto;
-                padding: 40px 0;
-            }
+            body { overflow-y: auto; height: auto; padding: 40px 0; }
             #dashboard-stage { 
-                grid-template-columns: 1fr; /* Single column */
-                grid-template-rows: auto auto auto;
-                height: auto; 
-                width: 90vw;
-                gap: 20px;
-                display: flex;
-                flex-direction: column;
+                grid-template-columns: 1fr; grid-template-rows: auto auto auto;
+                height: auto; width: 90vw; display: flex; flex-direction: column;
             }
-            .col-left, .col-mid, .col-right { 
-                min-height: auto;
-                height: auto;
-                max-height: 500px; /* Limit height of individual panels on mobile */
-            }
-            .panel {
-                height: auto;
-            }
+            .col-left, .col-mid, .col-right { height: auto; max-height: 500px; }
         }
     </style>
 </head>
@@ -202,17 +184,17 @@
 
     <div id="particle-layer"></div>
     <div id="toast-container"></div>
+    <img src="sean.png" id="hero-sean">
 
     <div id="artifact-stage" onclick="game.clickArtifact(event)">
         <div class="artifact"></div>
         <p style="color: var(--text-muted); margin-top: 20px;">Initializing...</p>
     </div>
 
-    <div id="dashboard-stage" class="hidden">
-        
+    <div id="dashboard-stage">
         <div class="panel col-left">
             <h2 style="letter-spacing: 2px; font-weight: 300; margin: 0;">S.E.A.N. Idle</h2>
-            <img src="sean.png" class="sean-avatar" onclick="game.clickSean(event)" draggable="false">
+            <img src="sean.png" class="sean-avatar" id="main-avatar" style="opacity:0" onclick="game.clickSean(event)" draggable="false">
             
             <div class="currency" id="ui-currency">0</div>
             <div style="font-size: 0.8rem; color: var(--text-muted);">SEANS</div>
@@ -233,7 +215,6 @@
         <div class="panel col-right">
             <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 0;">Achievements</h3>
             <div class="scroll-list" id="ui-achievements"></div>
-            
             <div style="margin-top: 10px; text-align: center;">
                  <button onclick="game.hardReset()" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; font-size: 0.7rem; padding: 4px; cursor: pointer;">WIPE SAVE</button>
             </div>
@@ -241,12 +222,11 @@
     </div>
 
     <script>
-        // CONFIGURATION
         const CONFIG = {
             eggClicksRequired: 10,
             tickRate: 100,
-            saveKey: 'sean_idle_ultimate_v1',
-            prestigeBase: 5000 // Seans needed for first prestige point
+            saveKey: 'sean_idle_fountain_v2',
+            prestigeBase: 5000
         };
 
         const UPGRADES = [
@@ -268,48 +248,38 @@
 
         class Game {
             constructor() {
-                // Default State
                 this.state = {
                     eggClicks: 0,
                     unlocked: false,
                     currency: 0,
                     lifetimeCurrency: 0,
-                    prestigeLevel: 0, // "Core Memories"
+                    prestigeLevel: 0,
                     upgrades: Array(UPGRADES.length).fill(0),
-                    achievements: [], // Store IDs of unlocked achievements
+                    achievements: [],
                     startTime: Date.now()
                 };
 
                 this.load();
                 this.initUI();
                 
-                // Loops
                 setInterval(() => this.tick(), CONFIG.tickRate);
                 setInterval(() => this.save(), 5000);
-                setInterval(() => this.passiveVisuals(), 500); // Visual FX loop
+                
+                // Faster visual loop for smoother fountain
+                setInterval(() => this.passiveVisuals(), 100); 
             }
 
             // --- CALCULATIONS ---
-
-            getPrestigeBonus() {
-                return 1 + (this.state.prestigeLevel * 0.10); // 10% per level
-            }
-
+            getPrestigeBonus() { return 1 + (this.state.prestigeLevel * 0.10); }
             getSPS() {
-                let rawSPS = this.state.upgrades.reduce((total, count, index) => {
-                    return total + (count * UPGRADES[index].production);
-                }, 0);
+                let rawSPS = this.state.upgrades.reduce((total, count, index) => total + (count * UPGRADES[index].production), 0);
                 return rawSPS * this.getPrestigeBonus();
             }
-
             getUpgradeCost(index) {
-                const base = UPGRADES[index].baseCost;
-                const count = this.state.upgrades[index];
-                return Math.floor(base * Math.pow(1.15, count));
+                return Math.floor(UPGRADES[index].baseCost * Math.pow(1.15, this.state.upgrades[index]));
             }
 
-            // --- CORE ACTIONS ---
-
+            // --- INTERACTIONS ---
             clickArtifact(e) {
                 this.state.eggClicks++;
                 const el = document.querySelector('.artifact');
@@ -319,16 +289,138 @@
                 if (this.state.eggClicks >= CONFIG.eggClicksRequired) {
                     this.state.unlocked = true;
                     this.save();
-                    this.renderTransition();
+                    this.triggerHatchSequence();
                 }
             }
 
             clickSean(e) {
                 const amount = 1 * this.getPrestigeBonus();
                 this.addCurrency(amount);
-                this.spawnParticles(e.clientX, e.clientY, 1, true); // Burst on click
+                this.spawnParticles(e.clientX, e.clientY, 3, true); // Burst on click
             }
 
+            triggerHatchSequence() {
+                const egg = document.getElementById('artifact-stage');
+                const dashboard = document.getElementById('dashboard-stage');
+                const hero = document.getElementById('hero-sean');
+                
+                // 1. Egg Explosion
+                const rect = egg.getBoundingClientRect();
+                const centerX = rect.left + rect.width/2;
+                const centerY = rect.top + rect.height/2;
+                this.spawnParticles(centerX, centerY, 50, true); // BIG explosion
+                egg.classList.add('hidden');
+
+                // 2. Hero Appears
+                hero.style.display = 'block';
+                hero.animate([
+                    { transform: 'translate(-50%, -50%) scale(0)' },
+                    { transform: 'translate(-50%, -50%) scale(1.5)' }
+                ], { duration: 600, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)', fill: 'forwards' });
+
+                // 3. Pause, then Fly to slot
+                setTimeout(() => {
+                    // Reveal dashboard (but keep avatar hidden)
+                    dashboard.style.display = 'grid'; // ensure it's calculated
+                    dashboard.classList.add('fade-in');
+                    
+                    const target = document.getElementById('main-avatar');
+                    const tRect = target.getBoundingClientRect();
+                    const startX = window.innerWidth / 2;
+                    const startY = window.innerHeight / 2;
+                    const endX = tRect.left + tRect.width / 2;
+                    const endY = tRect.top + tRect.height / 2;
+
+                    // Animate Hero movement
+                    const anim = hero.animate([
+                        { transform: 'translate(-50%, -50%) scale(1.5)', top: '50%', left: '50%' },
+                        { transform: 'translate(-50%, -50%) scale(1)', top: `${endY}px`, left: `${endX}px` }
+                    ], { duration: 800, easing: 'ease-in-out', fill: 'forwards' });
+
+                    anim.onfinish = () => {
+                        hero.style.display = 'none';
+                        target.style.opacity = '1';
+                        // Shake screen on impact
+                        document.body.classList.add('shake-screen');
+                        this.spawnParticles(endX, endY, 20, true); // Impact dust
+                        setTimeout(() => document.body.classList.remove('shake-screen'), 500);
+                    };
+
+                }, 1500);
+            }
+
+            // --- PARTICLES (THE FOUNTAIN) ---
+            spawnParticles(x, y, count, isExplosion) {
+                const container = document.getElementById('particle-layer');
+                const maxParticles = 300; // Perf cap
+                if (container.children.length > maxParticles) return;
+
+                for(let i=0; i<count; i++) {
+                    const img = document.createElement('img');
+                    img.src = 'sean.png';
+                    img.className = 'mini-sean';
+                    
+                    // Center origin
+                    img.style.left = (x - 15) + 'px';
+                    img.style.top = (y - 15) + 'px';
+                    container.appendChild(img);
+
+                    // FOUNTAIN PHYSICS
+                    // High upward velocity (negative Y)
+                    // Wide X spread
+                    const spread = isExplosion ? 20 : 10;
+                    const upForce = isExplosion ? 25 : 15;
+                    
+                    let velocityX = (Math.random() - 0.5) * spread; 
+                    let velocityY = -(Math.random() * 10) - 10; // Minimum lift
+                    if (isExplosion) velocityY -= 10; // Extra pop for explosions
+
+                    let posX = x;
+                    let posY = y;
+                    let rotation = Math.random() * 360;
+                    let rotSpeed = (Math.random() - 0.5) * 20;
+                    let opacity = 1;
+
+                    const anim = setInterval(() => {
+                        velocityY += 0.8; // Gravity
+                        posX += velocityX;
+                        posY += velocityY;
+                        rotation += rotSpeed;
+                        
+                        // Fade out near end or if falling too far
+                        if (velocityY > 0) opacity -= 0.015;
+
+                        img.style.transform = `translate(${posX - x}px, ${posY - y}px) rotate(${rotation}deg)`;
+                        img.style.opacity = opacity;
+
+                        if (opacity <= 0 || posY > window.innerHeight + 50) {
+                            clearInterval(anim);
+                            img.remove();
+                        }
+                    }, 20);
+                }
+            }
+
+            passiveVisuals() {
+                if(!this.state.unlocked) return;
+                const sps = this.getSPS();
+                if (sps < 1) return;
+
+                // Scale particle count with SPS for "Fountain" effect
+                // Cap it so we don't crash the browser at endgame
+                let count = Math.min(Math.ceil(sps / 8), 5); 
+                
+                const avatar = document.getElementById('main-avatar');
+                if(avatar && avatar.offsetParent !== null) { // Visible check
+                    const rect = avatar.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    // False = use fountain physics, not explosion physics
+                    this.spawnParticles(centerX, centerY, count, false);
+                }
+            }
+
+            // --- UI & LOGIC ---
             buyUpgrade(index) {
                 const cost = this.getUpgradeCost(index);
                 if (this.state.currency >= cost) {
@@ -339,28 +431,22 @@
             }
 
             tryPrestige() {
-                // Formula: Cube root of (Lifetime / Base)
                 const potential = Math.floor(Math.cbrt(this.state.lifetimeCurrency / CONFIG.prestigeBase));
-                
                 if (potential > this.state.prestigeLevel) {
                     const gain = potential - this.state.prestigeLevel;
-                    if(confirm(`Singularity Reset!\n\nYou will reset your Seans and Upgrades.\nYou will gain ${gain} Core Memories.\nEach Memory gives +10% bonus.\n\nDo you want to proceed?`)) {
-                        this.doPrestige(potential);
+                    if(confirm(`Singularity Reset!\n\nReset everything to gain ${gain} Core Memories (+${gain * 10}% Bonus).`)) {
+                        this.state.prestigeLevel = potential;
+                        this.state.currency = 0;
+                        this.state.upgrades = Array(UPGRADES.length).fill(0);
+                        this.state.unlocked = false; // Relock to see the cool animation again!
+                        this.state.eggClicks = 0;
+                        this.save();
+                        location.reload();
                     }
                 } else {
-                    alert(`Not enough energy for Singularity.\nNeed significantly more Lifetime Seans to gain the next level.`);
+                    alert(`Not enough energy. Need more Seans.`);
                 }
             }
-
-            doPrestige(newLevel) {
-                this.state.prestigeLevel = newLevel;
-                this.state.currency = 0;
-                this.state.upgrades = Array(UPGRADES.length).fill(0);
-                this.save();
-                location.reload(); // Simplest way to refresh visual state fully
-            }
-
-            // --- ENGINE ---
 
             tick() {
                 if (!this.state.unlocked) return;
@@ -379,93 +465,24 @@
                 ACHIEVEMENTS.forEach(ach => {
                     if (!this.state.achievements.includes(ach.id)) {
                         if (ach.condition(this.state, this)) {
-                            this.unlockAchievement(ach);
+                            this.state.achievements.push(ach.id);
+                            this.showToast(ach.name, ach.desc);
+                            this.renderAchievements();
                         }
                     }
                 });
-            }
-
-            unlockAchievement(ach) {
-                this.state.achievements.push(ach.id);
-                this.showToast(ach.name, ach.desc);
-                this.renderAchievements(); // Refresh list style
-            }
-
-            // --- VISUAL FX ---
-
-            spawnParticles(x, y, count, isClick) {
-                const container = document.getElementById('particle-layer');
-                
-                for(let i=0; i<count; i++) {
-                    const img = document.createElement('img');
-                    img.src = 'sean.png';
-                    img.className = 'mini-sean';
-                    
-                    // Start position
-                    img.style.left = (x - 15) + 'px';
-                    img.style.top = (y - 15) + 'px';
-
-                    container.appendChild(img);
-
-                    // Physics vars
-                    let velocityX = (Math.random() - 0.5) * 15; // Random X spread
-                    let velocityY = isClick ? -15 - (Math.random() * 5) : -5; // Upward burst
-                    let posX = x;
-                    let posY = y;
-                    let opacity = 1;
-
-                    // Animate
-                    const anim = setInterval(() => {
-                        velocityY += 0.8; // Gravity
-                        posX += velocityX;
-                        posY += velocityY;
-                        opacity -= 0.02;
-
-                        img.style.left = posX + 'px';
-                        img.style.top = posY + 'px';
-                        img.style.opacity = opacity;
-                        img.style.transform = `rotate(${velocityX * 5}deg)`;
-
-                        if (opacity <= 0 || posY > window.innerHeight) {
-                            clearInterval(anim);
-                            img.remove();
-                        }
-                    }, 20);
-                }
-            }
-
-            passiveVisuals() {
-                if(!this.state.unlocked) return;
-                const sps = this.getSPS();
-                if (sps < 1) return;
-
-                // Scale visuals based on SPS, but cap it so browser doesn't die
-                let count = Math.min(Math.floor(sps / 5), 5); 
-                if (Math.random() > 0.5) return; // Don't do it every tick
-
-                // Spawn from center image
-                const avatar = document.querySelector('.sean-avatar');
-                if(avatar) {
-                    const rect = avatar.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    this.spawnParticles(centerX, centerY, count || 1, false);
-                }
             }
 
             showToast(title, msg) {
                 const con = document.getElementById('toast-container');
                 const toast = document.createElement('div');
                 toast.className = 'toast';
-                toast.innerHTML = `<h4>🏆 Achievement Unlocked!</h4><p><strong>${title}</strong><br>${msg}</p>`;
+                toast.innerHTML = `<h4>🏆 Unlocked!</h4><p><strong>${title}</strong><br>${msg}</p>`;
                 con.appendChild(toast);
                 setTimeout(() => toast.remove(), 4000);
             }
 
-            // --- UI ---
-
             initUI() {
-                // Build Upgrade List
                 const uList = document.getElementById('ui-upgrades');
                 uList.innerHTML = '';
                 UPGRADES.forEach((u, i) => {
@@ -481,13 +498,14 @@
                     `;
                     uList.appendChild(div);
                 });
-
                 this.renderAchievements();
 
+                // If already unlocked, skip animation
                 if (this.state.unlocked) {
                     document.getElementById('artifact-stage').classList.add('hidden');
-                    document.getElementById('dashboard-stage').classList.remove('hidden');
-                    document.getElementById('dashboard-stage').classList.add('fade-in');
+                    const dash = document.getElementById('dashboard-stage');
+                    dash.style.opacity = '1';
+                    document.getElementById('main-avatar').style.opacity = '1';
                 }
             }
 
@@ -509,59 +527,29 @@
                 });
             }
 
-            renderTransition() {
-                const egg = document.getElementById('artifact-stage');
-                const dash = document.getElementById('dashboard-stage');
-                egg.style.opacity = '0';
-                setTimeout(() => {
-                    egg.classList.add('hidden');
-                    dash.classList.remove('hidden');
-                    dash.classList.add('fade-in');
-                }, 500);
-            }
-
             updateUI() {
                 if (!this.state.unlocked) return;
-
-                // Stats
                 document.getElementById('ui-currency').innerText = Math.floor(this.state.currency).toLocaleString();
                 document.getElementById('ui-rate').innerText = `${this.getSPS().toFixed(1)} Seans/sec`;
-                
-                // Prestige Stats
                 document.getElementById('ui-prestige-lvl').innerText = this.state.prestigeLevel;
                 document.getElementById('ui-prestige-mult').innerText = Math.round((this.getPrestigeBonus() - 1) * 100);
 
-                // Upgrade Buttons
                 UPGRADES.forEach((u, i) => {
                     const btn = document.getElementById(`btn-buy-${i}`);
                     const cost = this.getUpgradeCost(i);
-                    const count = this.state.upgrades[i];
-                    
-                    btn.innerHTML = `<div>${cost.toLocaleString()}</div><div style="font-size:0.7em; opacity:0.8">Lvl ${count}</div>`;
+                    btn.innerHTML = `<div>${cost.toLocaleString()}</div><div style="font-size:0.7em; opacity:0.8">Lvl ${this.state.upgrades[i]}</div>`;
                     btn.disabled = this.state.currency < cost;
                     btn.style.opacity = this.state.currency < cost ? 0.5 : 1;
                 });
             }
 
-            // --- SAVE SYSTEM ---
-
-            save() {
-                localStorage.setItem(CONFIG.saveKey, JSON.stringify(this.state));
-            }
-
+            save() { localStorage.setItem(CONFIG.saveKey, JSON.stringify(this.state)); }
             load() {
                 const data = localStorage.getItem(CONFIG.saveKey);
-                if (data) {
-                    const saved = JSON.parse(data);
-                    this.state = { ...this.state, ...saved };
-                }
+                if (data) this.state = { ...this.state, ...JSON.parse(data) };
             }
-
             hardReset() {
-                if(confirm("FULL WIPE: This deletes saves, prestige, everything. Sure?")) {
-                    localStorage.removeItem(CONFIG.saveKey);
-                    location.reload();
-                }
+                if(confirm("Wipe Save?")) { localStorage.removeItem(CONFIG.saveKey); location.reload(); }
             }
         }
 
