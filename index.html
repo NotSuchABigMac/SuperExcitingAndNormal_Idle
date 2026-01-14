@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.E.A.N. Protocol</title>
+    <title>S.E.A.N. Protocol: Ultimate</title>
     <style>
         :root {
             --bg-dark: #0f172a;
             --bg-panel: #1e293b;
             --primary: #38bdf8;
             --accent: #818cf8;
+            --gold: #fbbf24;
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
             --border: #334155;
@@ -29,50 +30,73 @@
             overflow: hidden;
         }
 
+        /* Particles Layer */
+        #particle-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+        
+        .mini-sean {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--bg-panel);
+            border-left: 4px solid var(--gold);
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.5s ease-out;
+            min-width: 250px;
+        }
+        
+        .toast h4 { margin: 0 0 5px 0; color: var(--gold); font-size: 0.9rem; }
+        .toast p { margin: 0; font-size: 0.8rem; }
+
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
         /* Utility */
         .hidden { display: none !important; opacity: 0; }
         .fade-in { animation: fadeIn 1s forwards; }
 
-        /* Stage 1: The Artifact (Egg) */
-        #artifact-stage {
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.05s;
-        }
-        
+        /* Stage 1: The Artifact */
+        #artifact-stage { text-align: center; cursor: pointer; transition: transform 0.05s; z-index: 10; }
         .artifact {
-            width: 180px;
-            height: 240px;
+            width: 180px; height: 240px;
             background: radial-gradient(circle at 30% 30%, #e2e8f0, #cbd5e1);
             border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            position: relative;
-            border: 1px solid #94a3b8;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto; position: relative; border: 1px solid #94a3b8;
         }
-
         .artifact::after {
-            content: "PROJECT: NORMAL";
-            font-size: 0.7rem;
-            color: #64748b;
-            font-family: monospace;
-            letter-spacing: 2px;
-            position: absolute;
-            bottom: 40px;
+            content: "PROJECT: NORMAL"; font-size: 0.7rem; color: #64748b;
+            font-family: monospace; letter-spacing: 2px; position: absolute; bottom: 40px;
         }
 
         /* Stage 2: Dashboard */
         #dashboard-stage {
-            width: 100%;
-            max-width: 900px;
-            height: 90vh;
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 20px;
-            padding: 20px;
+            width: 100%; max-width: 1000px; height: 95vh;
+            display: grid; grid-template-columns: 300px 1fr 250px;
+            gap: 20px; padding: 20px;
         }
 
         .panel {
@@ -80,211 +104,202 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
 
-        /* Left Panel: Core */
-        .core-display {
-            align-items: center;
-            text-align: center;
-            flex-grow: 1;
-            justify-content: center;
-        }
+        /* Columns */
+        .col-left { text-align: center; align-items: center; }
+        .col-mid { }
+        .col-right { }
 
         .sean-avatar {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 4px solid var(--primary);
+            width: 180px; height: 180px;
+            border-radius: 50%; border: 4px solid var(--primary);
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.2s;
-            object-fit: cover;
+            cursor: pointer; transition: transform 0.1s;
+            object-fit: cover; margin-top: 20px;
         }
+        .sean-avatar:active { transform: scale(0.90); }
 
-        .sean-avatar:active { transform: scale(0.95); }
-        .sean-avatar:hover { box-shadow: 0 0 40px rgba(56, 189, 248, 0.6); }
-
-        .metric-container { margin-top: 20px; }
-        .currency { font-size: 2rem; font-weight: 800; color: var(--text-main); }
-        .rate { color: var(--primary); font-family: monospace; font-size: 1.1rem; margin-top: 5px; }
-
-        /* Right Panel: Upgrades */
-        .upgrade-list {
-            overflow-y: auto;
-            padding-right: 10px;
-        }
+        .currency { font-size: 2rem; font-weight: 800; color: var(--text-main); margin-top: 20px; }
+        .rate { color: var(--primary); font-family: monospace; font-size: 1.1rem; }
         
-        .upgrade-list::-webkit-scrollbar { width: 6px; }
-        .upgrade-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-        .upgrade-card {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            padding: 15px;
-            margin-bottom: 12px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s;
+        .prestige-box {
+            margin-top: auto; width: 100%;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid var(--gold);
+            padding: 10px; border-radius: 8px;
+        }
+        .prestige-btn {
+            background: var(--gold); color: #000; width: 100%;
+            border: none; padding: 8px; border-radius: 4px;
+            font-weight: bold; cursor: pointer; margin-top: 5px;
         }
 
-        .upgrade-card:hover { border-color: var(--primary); }
-        .upgrade-info h4 { margin: 0; font-size: 1rem; }
-        .upgrade-info p { margin: 4px 0 0; color: var(--text-muted); font-size: 0.85rem; }
+        /* Lists */
+        .scroll-list { overflow-y: auto; padding-right: 5px; flex-grow: 1; }
+        .scroll-list::-webkit-scrollbar { width: 4px; }
+        .scroll-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+        .card {
+            background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border);
+            padding: 12px; margin-bottom: 10px; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .ach-card { opacity: 0.5; filter: grayscale(1); }
+        .ach-card.unlocked { opacity: 1; filter: grayscale(0); border-color: var(--gold); }
 
         .btn-buy {
-            background: var(--primary);
-            color: var(--bg-dark);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            min-width: 100px;
-            transition: opacity 0.2s;
+            background: var(--primary); color: var(--bg-dark);
+            border: none; padding: 8px 12px; border-radius: 6px;
+            font-weight: 700; cursor: pointer; min-width: 80px;
         }
-        
-        .btn-buy:disabled {
-            background: var(--border);
-            color: var(--text-muted);
-            cursor: not-allowed;
-        }
-
-        /* Floating Text Particles */
-        .floater {
-            position: absolute;
-            color: var(--primary);
-            font-weight: bold;
-            pointer-events: none;
-            animation: floatUp 1s forwards;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-50px); }
-        }
+        .btn-buy:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            #dashboard-stage { grid-template-columns: 1fr; overflow-y: scroll; height: auto;}
+        /* Responsive */
+        @media (max-width: 900px) {
+            #dashboard-stage { grid-template-columns: 1fr; height: auto; overflow-y: auto; }
+            .col-left, .col-mid, .col-right { min-height: 400px; }
         }
     </style>
 </head>
 <body>
 
+    <div id="particle-layer"></div>
+    <div id="toast-container"></div>
+
     <div id="artifact-stage" onclick="game.clickArtifact(event)">
         <div class="artifact"></div>
-        <p style="color: var(--text-muted); margin-top: 20px; font-size: 0.9rem;">Initializing...</p>
+        <p style="color: var(--text-muted); margin-top: 20px;">Initializing...</p>
     </div>
 
     <div id="dashboard-stage" class="hidden">
         
-        <div class="panel core-display">
-            <h2 style="margin-bottom: 30px; letter-spacing: 2px; font-weight: 300;">SEAN CONNECT</h2>
+        <div class="panel col-left">
+            <h2 style="letter-spacing: 2px; font-weight: 300; margin: 0;">SEAN CONNECT</h2>
             <img src="sean.png" class="sean-avatar" onclick="game.clickSean(event)" draggable="false">
             
-            <div class="metric-container">
-                <div class="currency" id="ui-currency">0</div>
-                <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Total Seans</div>
-                <div class="rate" id="ui-rate">0.0 / sec</div>
-            </div>
+            <div class="currency" id="ui-currency">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">SEANS</div>
+            <div class="rate" id="ui-rate">0.0 / sec</div>
 
-            <div style="margin-top: auto; width: 100%;">
-                <button onclick="game.hardReset()" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 5px 10px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; opacity: 0.5;">RESET DATABASE</button>
+            <div class="prestige-box" id="prestige-ui">
+                <div style="font-size: 0.8em; color: var(--gold); font-weight: bold;">CORE MEMORIES: <span id="ui-prestige-lvl">0</span></div>
+                <div style="font-size: 0.7em;">+<span id="ui-prestige-mult">0</span>% Bonus</div>
+                <button class="prestige-btn" onclick="game.tryPrestige()">SINGULARITY (Reset)</button>
             </div>
         </div>
 
-        <div class="panel">
+        <div class="panel col-mid">
             <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 0;">Infrastructure</h3>
-            <div class="upgrade-list" id="ui-upgrades">
-                </div>
+            <div class="scroll-list" id="ui-upgrades"></div>
+        </div>
+
+        <div class="panel col-right">
+            <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 0;">Achievements</h3>
+            <div class="scroll-list" id="ui-achievements"></div>
+            
+            <div style="margin-top: 10px; text-align: center;">
+                 <button onclick="game.hardReset()" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; font-size: 0.7rem; padding: 4px; cursor: pointer;">WIPE SAVE</button>
+            </div>
         </div>
     </div>
 
     <script>
-        /**
-         * Game Configuration & Data Structure
-         */
+        // CONFIGURATION
         const CONFIG = {
-            eggClicksRequired: 15,
-            tickRate: 100, // 10 ticks per second
-            saveKey: 'sean_idle_save_v1'
+            eggClicksRequired: 10,
+            tickRate: 100,
+            saveKey: 'sean_idle_ultimate_v1',
+            prestigeBase: 5000 // Seans needed for first prestige point
         };
 
-        const UPGRADE_DATA = [
-            { id: 0, name: "Local Area Sean", desc: "A Sean on the LAN.", baseCost: 15, production: 1 },
-            { id: 1, name: "Sean Virtual Machine", desc: "Emulated friendship.", baseCost: 100, production: 5 },
-            { id: 2, name: "Containerized Sean", desc: "Kubernetes managed Seans.", baseCost: 1100, production: 12 },
-            { id: 3, name: "SeanGPT Model", desc: "AI generated companionship.", baseCost: 12000, production: 45 },
-            { id: 4, name: "Quantum Sean", desc: "He is both there and not there.", baseCost: 130000, production: 150 },
+        const UPGRADES = [
+            { name: "Local Area Sean", desc: "Basic LAN connection.", baseCost: 15, production: 1 },
+            { name: "Sean Clone", desc: "Biological replica.", baseCost: 100, production: 5 },
+            { name: "Sean Server", desc: "Dedicated hardware.", baseCost: 1100, production: 12 },
+            { name: "SeanGPT", desc: "Large Language Sean.", baseCost: 12000, production: 45 },
+            { name: "Quantum Sean", desc: "Superposition friendship.", baseCost: 130000, production: 150 },
+            { name: "Galactic Sean", desc: "Dyson Sphere of Seans.", baseCost: 1400000, production: 600 }
         ];
 
-        /**
-         * Core Game Logic
-         */
+        const ACHIEVEMENTS = [
+            { id: 'first_click', name: "First Contact", desc: "Click Sean once.", condition: (s) => s.lifetimeCurrency >= 1 },
+            { id: '1k_club', name: "1k Club", desc: "Reach 1,000 Lifetime Seans.", condition: (s) => s.lifetimeCurrency >= 1000 },
+            { id: 'automation', name: "Automator", desc: "Reach 100 SPS.", condition: (s, game) => game.getSPS() >= 100 },
+            { id: 'millionaire', name: "Seanillionaire", desc: "1 Million Lifetime.", condition: (s) => s.lifetimeCurrency >= 1000000 },
+            { id: 'prestige_1', name: "Reborn", desc: "Prestige for the first time.", condition: (s) => s.prestigeLevel >= 1 },
+        ];
+
         class Game {
             constructor() {
+                // Default State
                 this.state = {
                     eggClicks: 0,
                     unlocked: false,
                     currency: 0,
                     lifetimeCurrency: 0,
-                    upgrades: Array(UPGRADE_DATA.length).fill(0), // Count of each upgrade
+                    prestigeLevel: 0, // "Core Memories"
+                    upgrades: Array(UPGRADES.length).fill(0),
+                    achievements: [], // Store IDs of unlocked achievements
                     startTime: Date.now()
                 };
 
                 this.load();
                 this.initUI();
-                this.loopId = setInterval(() => this.tick(), CONFIG.tickRate);
-                this.saveId = setInterval(() => this.save(), 5000); // Auto-save 5s
+                
+                // Loops
+                setInterval(() => this.tick(), CONFIG.tickRate);
+                setInterval(() => this.save(), 5000);
+                setInterval(() => this.passiveVisuals(), 500); // Visual FX loop
             }
 
-            // --- Mechanics ---
+            // --- CALCULATIONS ---
 
-            get productionPerSecond() {
-                return this.state.upgrades.reduce((total, count, index) => {
-                    return total + (count * UPGRADE_DATA[index].production);
+            getPrestigeBonus() {
+                return 1 + (this.state.prestigeLevel * 0.10); // 10% per level
+            }
+
+            getSPS() {
+                let rawSPS = this.state.upgrades.reduce((total, count, index) => {
+                    return total + (count * UPGRADES[index].production);
                 }, 0);
+                return rawSPS * this.getPrestigeBonus();
             }
+
+            getUpgradeCost(index) {
+                const base = UPGRADES[index].baseCost;
+                const count = this.state.upgrades[index];
+                return Math.floor(base * Math.pow(1.15, count));
+            }
+
+            // --- CORE ACTIONS ---
 
             clickArtifact(e) {
                 this.state.eggClicks++;
-                
-                // Visual feedback
                 const el = document.querySelector('.artifact');
                 el.style.transform = `scale(0.95) rotate(${Math.random() * 10 - 5}deg)`;
                 setTimeout(() => el.style.transform = 'scale(1) rotate(0deg)', 50);
 
                 if (this.state.eggClicks >= CONFIG.eggClicksRequired) {
-                    this.unlockGame();
+                    this.state.unlocked = true;
+                    this.save();
+                    this.renderTransition();
                 }
             }
 
-            unlockGame() {
-                this.state.unlocked = true;
-                this.save();
-                this.renderTransition();
-            }
-
             clickSean(e) {
-                this.addCurrency(1);
-                this.spawnFloater(e.clientX, e.clientY, "+1");
-            }
-
-            addCurrency(amount) {
-                this.state.currency += amount;
-                this.state.lifetimeCurrency += amount;
-                this.updateUI(); // Immediate update for responsiveness
+                const amount = 1 * this.getPrestigeBonus();
+                this.addCurrency(amount);
+                this.spawnParticles(e.clientX, e.clientY, 1, true); // Burst on click
             }
 
             buyUpgrade(index) {
-                const cost = this.getCost(index);
+                const cost = this.getUpgradeCost(index);
                 if (this.state.currency >= cost) {
                     this.state.currency -= cost;
                     this.state.upgrades[index]++;
@@ -292,51 +307,151 @@
                 }
             }
 
-            getCost(index) {
-                const base = UPGRADE_DATA[index].baseCost;
-                const count = this.state.upgrades[index];
-                return Math.floor(base * Math.pow(1.15, count));
+            tryPrestige() {
+                // Formula: Cube root of (Lifetime / Base)
+                const potential = Math.floor(Math.cbrt(this.state.lifetimeCurrency / CONFIG.prestigeBase));
+                
+                if (potential > this.state.prestigeLevel) {
+                    const gain = potential - this.state.prestigeLevel;
+                    if(confirm(`Singularity Reset!\n\nYou will reset your Seans and Upgrades.\nYou will gain ${gain} Core Memories.\nEach Memory gives +10% bonus.\n\nDo you want to proceed?`)) {
+                        this.doPrestige(potential);
+                    }
+                } else {
+                    alert(`Not enough energy for Singularity.\nNeed significantly more Lifetime Seans to gain the next level.`);
+                }
             }
 
-            // --- Engine ---
+            doPrestige(newLevel) {
+                this.state.prestigeLevel = newLevel;
+                this.state.currency = 0;
+                this.state.upgrades = Array(UPGRADES.length).fill(0);
+                this.save();
+                location.reload(); // Simplest way to refresh visual state fully
+            }
+
+            // --- ENGINE ---
 
             tick() {
                 if (!this.state.unlocked) return;
-                const earned = this.productionPerSecond / (1000 / CONFIG.tickRate);
-                this.addCurrency(earned);
+                const earned = this.getSPS() / (1000 / CONFIG.tickRate);
+                if (earned > 0) this.addCurrency(earned);
+                this.checkAchievements();
             }
 
-            spawnFloater(x, y, text) {
-                const el = document.createElement('div');
-                el.classList.add('floater');
-                el.textContent = text;
-                el.style.left = `${x}px`;
-                el.style.top = `${y}px`;
-                document.body.appendChild(el);
-                setTimeout(() => el.remove(), 1000);
+            addCurrency(amt) {
+                this.state.currency += amt;
+                this.state.lifetimeCurrency += amt;
+                this.updateUI();
             }
 
-            // --- UI & Rendering ---
+            checkAchievements() {
+                ACHIEVEMENTS.forEach(ach => {
+                    if (!this.state.achievements.includes(ach.id)) {
+                        if (ach.condition(this.state, this)) {
+                            this.unlockAchievement(ach);
+                        }
+                    }
+                });
+            }
+
+            unlockAchievement(ach) {
+                this.state.achievements.push(ach.id);
+                this.showToast(ach.name, ach.desc);
+                this.renderAchievements(); // Refresh list style
+            }
+
+            // --- VISUAL FX ---
+
+            spawnParticles(x, y, count, isClick) {
+                const container = document.getElementById('particle-layer');
+                
+                for(let i=0; i<count; i++) {
+                    const img = document.createElement('img');
+                    img.src = 'sean.png';
+                    img.className = 'mini-sean';
+                    
+                    // Start position
+                    img.style.left = (x - 15) + 'px';
+                    img.style.top = (y - 15) + 'px';
+
+                    container.appendChild(img);
+
+                    // Physics vars
+                    let velocityX = (Math.random() - 0.5) * 15; // Random X spread
+                    let velocityY = isClick ? -15 - (Math.random() * 5) : -5; // Upward burst
+                    let posX = x;
+                    let posY = y;
+                    let opacity = 1;
+
+                    // Animate
+                    const anim = setInterval(() => {
+                        velocityY += 0.8; // Gravity
+                        posX += velocityX;
+                        posY += velocityY;
+                        opacity -= 0.02;
+
+                        img.style.left = posX + 'px';
+                        img.style.top = posY + 'px';
+                        img.style.opacity = opacity;
+                        img.style.transform = `rotate(${velocityX * 5}deg)`;
+
+                        if (opacity <= 0 || posY > window.innerHeight) {
+                            clearInterval(anim);
+                            img.remove();
+                        }
+                    }, 20);
+                }
+            }
+
+            passiveVisuals() {
+                if(!this.state.unlocked) return;
+                const sps = this.getSPS();
+                if (sps < 1) return;
+
+                // Scale visuals based on SPS, but cap it so browser doesn't die
+                let count = Math.min(Math.floor(sps / 5), 5); 
+                if (Math.random() > 0.5) return; // Don't do it every tick
+
+                // Spawn from center image
+                const avatar = document.querySelector('.sean-avatar');
+                if(avatar) {
+                    const rect = avatar.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    this.spawnParticles(centerX, centerY, count || 1, false);
+                }
+            }
+
+            showToast(title, msg) {
+                const con = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.innerHTML = `<h4>🏆 Achievement Unlocked!</h4><p><strong>${title}</strong><br>${msg}</p>`;
+                con.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            }
+
+            // --- UI ---
 
             initUI() {
-                // Generate Upgrade DOM
-                const list = document.getElementById('ui-upgrades');
-                list.innerHTML = '';
-                UPGRADE_DATA.forEach((u, i) => {
+                // Build Upgrade List
+                const uList = document.getElementById('ui-upgrades');
+                uList.innerHTML = '';
+                UPGRADES.forEach((u, i) => {
                     const div = document.createElement('div');
-                    div.className = 'upgrade-card';
+                    div.className = 'card';
                     div.innerHTML = `
-                        <div class="upgrade-info">
-                            <h4>${u.name}</h4>
-                            <p>${u.desc}</p>
-                            <p style="color: var(--accent); font-size: 0.75rem; margin-top: 5px;">+${u.production} SPS</p>
+                        <div>
+                            <div style="font-weight:bold">${u.name}</div>
+                            <div style="font-size:0.8em; color:var(--text-muted)">${u.desc}</div>
+                            <div style="font-size:0.7em; color:var(--accent)">+${u.production} SPS</div>
                         </div>
-                        <button class="btn-buy" id="btn-buy-${i}" onclick="game.buyUpgrade(${i})">
-                            Cost
-                        </button>
+                        <button class="btn-buy" id="btn-buy-${i}" onclick="game.buyUpgrade(${i})">Cost</button>
                     `;
-                    list.appendChild(div);
+                    uList.appendChild(div);
                 });
+
+                this.renderAchievements();
 
                 if (this.state.unlocked) {
                     document.getElementById('artifact-stage').classList.add('hidden');
@@ -345,10 +460,27 @@
                 }
             }
 
+            renderAchievements() {
+                const aList = document.getElementById('ui-achievements');
+                aList.innerHTML = '';
+                ACHIEVEMENTS.forEach(ach => {
+                    const unlocked = this.state.achievements.includes(ach.id);
+                    const div = document.createElement('div');
+                    div.className = `card ach-card ${unlocked ? 'unlocked' : ''}`;
+                    div.innerHTML = `
+                        <div style="font-size:1.2rem; margin-right:10px">${unlocked ? '🏆' : '🔒'}</div>
+                        <div>
+                            <div style="font-weight:bold; font-size:0.9rem">${ach.name}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted)">${ach.desc}</div>
+                        </div>
+                    `;
+                    aList.appendChild(div);
+                });
+            }
+
             renderTransition() {
                 const egg = document.getElementById('artifact-stage');
                 const dash = document.getElementById('dashboard-stage');
-                
                 egg.style.opacity = '0';
                 setTimeout(() => {
                     egg.classList.add('hidden');
@@ -360,29 +492,27 @@
             updateUI() {
                 if (!this.state.unlocked) return;
 
-                // Update Stats
+                // Stats
                 document.getElementById('ui-currency').innerText = Math.floor(this.state.currency).toLocaleString();
-                document.getElementById('ui-rate').innerText = `${this.productionPerSecond.toFixed(1)} Seans/sec`;
+                document.getElementById('ui-rate').innerText = `${this.getSPS().toFixed(1)} Seans/sec`;
+                
+                // Prestige Stats
+                document.getElementById('ui-prestige-lvl').innerText = this.state.prestigeLevel;
+                document.getElementById('ui-prestige-mult').innerText = Math.round((this.getPrestigeBonus() - 1) * 100);
 
-                // Update Buttons
-                UPGRADE_DATA.forEach((u, i) => {
+                // Upgrade Buttons
+                UPGRADES.forEach((u, i) => {
                     const btn = document.getElementById(`btn-buy-${i}`);
-                    const cost = this.getCost(i);
+                    const cost = this.getUpgradeCost(i);
                     const count = this.state.upgrades[i];
                     
                     btn.innerHTML = `<div>${cost.toLocaleString()}</div><div style="font-size:0.7em; opacity:0.8">Lvl ${count}</div>`;
-                    
-                    if (this.state.currency >= cost) {
-                        btn.disabled = false;
-                        btn.style.opacity = '1';
-                    } else {
-                        btn.disabled = true;
-                        btn.style.opacity = '0.5';
-                    }
+                    btn.disabled = this.state.currency < cost;
+                    btn.style.opacity = this.state.currency < cost ? 0.5 : 1;
                 });
             }
 
-            // --- Persistence ---
+            // --- SAVE SYSTEM ---
 
             save() {
                 localStorage.setItem(CONFIG.saveKey, JSON.stringify(this.state));
@@ -392,22 +522,19 @@
                 const data = localStorage.getItem(CONFIG.saveKey);
                 if (data) {
                     const saved = JSON.parse(data);
-                    // Merge save with default state to handle version updates safely
                     this.state = { ...this.state, ...saved };
                 }
             }
 
             hardReset() {
-                if(confirm("Wipe save data? This cannot be undone.")) {
+                if(confirm("FULL WIPE: This deletes saves, prestige, everything. Sure?")) {
                     localStorage.removeItem(CONFIG.saveKey);
                     location.reload();
                 }
             }
         }
 
-        // Start
         const game = new Game();
-
     </script>
 </body>
 </html>
